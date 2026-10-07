@@ -1,0 +1,5 @@
+numpy==2.5.3
+pikepdf==10.16.0
+pillow==12.3.0
+pymupdf==1.28.2
+scipy==1.18.1

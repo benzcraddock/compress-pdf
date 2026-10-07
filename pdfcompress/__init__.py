@@ -1,0 +1,1 @@
+"""Fidelity-first PDF compressor."""

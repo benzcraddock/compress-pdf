@@ -1,0 +1,14 @@
+#!/bin/sh
+# Launch the PDF Compressor. First run sets up a local Python environment.
+#   ./compress-pdf               → opens the web app at http://127.0.0.1:8765
+#   ./compress-pdf FILE.pdf ...  → compresses from the command line
+DIR="$(cd "$(dirname "$0")" && pwd)"
+PY="$DIR/.venv/bin/python"
+if [ ! -x "$PY" ]; then
+  python3 -m venv "$DIR/.venv" && "$DIR/.venv/bin/pip" install -q -r "$DIR/requirements.txt" || exit 1
+fi
+export PYTHONPATH="$DIR${PYTHONPATH:+:$PYTHONPATH}"
+if [ $# -eq 0 ]; then
+  exec "$PY" -m pdfcompress.server
+fi
+exec "$PY" -m pdfcompress "$@"

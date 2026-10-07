@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF Compressor</title>
+<link rel="stylesheet" href="suite.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+           stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg>
+    </span>
+    <h1>PDF Compressor</h1>
+  </div>
+
+  <span class="divider" aria-hidden="true"></span>
+
+  <div id="titleBlock">
+    <span id="fileName" class="empty">No files added</span>
+    <span id="fileMeta"></span>
+  </div>
+
+  <div class="actions-right">
+    <label class="btn" for="file">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      Add PDFs
+    </label>
+    <input id="file" type="file" accept=".pdf,application/pdf" multiple hidden>
+    <button id="downloadAll" class="primary" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Download all
+    </button>
+  </div>
+</header>
+
+<main id="stage" class="empty">
+  <div id="list"></div>
+
+  <div id="drop">
+    <span class="drop-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+    </span>
+    <div class="drop-title">Drop PDFs to compress</div>
+    <div class="drop-sub">Every page is checked against the original before you get it back</div>
+    <label class="btn" for="file">Choose files</label>
+    <div id="error"></div>
+  </div>
+</main>
+
+<footer>
+  <div class="field">
+    <label for="preset">Preset</label>
+    <select id="preset">
+      <option value="lossless">Lossless — no image recompression</option>
+      <option value="balanced" selected>Balanced — 300 ppi, JPEG 85</option>
+      <option value="max">Max — 150 ppi, JPEG 80</option>
+      <option value="screen">Screen — sized for on-screen viewing</option>
+    </select>
+  </div>
+  <div class="field check">
+    <input id="strip" type="checkbox" checked>
+    <label for="strip">Strip private data — XMP history, PieceInfo</label>
+  </div>
+  <span id="counter">Changing settings re-runs every file · runs locally</span>
+</footer>
+
+<!-- Page preview -->
+<div id="preview" role="dialog" aria-modal="true" aria-label="Preview" hidden>
+  <div class="pv-head">
+    <button id="pvClose" class="icon-btn" aria-label="Close preview" title="Close (Esc)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="pv-title">
+      <span id="pvName"></span>
+      <span id="pvMeta"></span>
+    </div>
+    <div class="seg" id="pvMode" role="group" aria-label="Show">
+      <button data-mode="new" class="on">Compressed</button>
+      <button data-mode="orig">Original</button>
+      <button data-mode="both">Side by side</button>
+    </div>
+    <div class="field check pv-only">
+      <input id="pvChanged" type="checkbox">
+      <label for="pvChanged">Changed pages only</label>
+    </div>
+    <span id="pvPage">— / —</span>
+    <button id="pvDownload" class="primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Download
+    </button>
+  </div>
+  <div id="pvScroll"><div id="pvPages"></div></div>
+</div>
+
+<template id="cardTpl">
+  <article class="card">
+    <div class="card-row">
+      <span class="file-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
+      </span>
+      <div class="card-title">
+        <div class="card-name"></div>
+        <div class="card-meta"></div>
+      </div>
+      <span class="badge"></span>
+      <div class="card-sizes"></div>
+      <div class="card-saved"></div>
+      <div class="card-actions">
+        <button class="preview" disabled title="Scroll through the pages before downloading">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          Preview
+        </button>
+        <button class="icon-btn rerun" title="Run again with current settings" aria-label="Run again">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg>
+        </button>
+        <button class="download" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Download
+        </button>
+        <button class="icon-btn toggle" aria-label="Show report" aria-expanded="false" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="bar"><div></div></div>
+    <div class="card-detail" hidden></div>
+  </article>
+</template>
+
+<script src="app.js"></script>
+</body>
+</html>
